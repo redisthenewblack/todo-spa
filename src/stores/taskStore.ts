@@ -11,20 +11,19 @@ export const useTaskStore = defineStore('tasks', () => {
   const filteredTasks = computed(() => {
     let filtered = tasks.value
 
-    // Фильтрация по статусу
-    if (filterStatus.value === 'active') {
-      filtered = filtered.filter((task) => !task.done)
-    } else if (filterStatus.value === 'completed') {
-      filtered = filtered.filter((task) => task.done)
-    }
+    const query = searchQuery.value.trim().toLowerCase();
 
-    // Поиск
-    if (searchQuery.value) {
-      const query = searchQuery.value.toLowerCase()
-      filtered = filtered.filter((task) => task.title.toLowerCase().includes(query))
-    }
+    return tasks.value.filter((task) => {
+      const statusMatch  =
+        filterStatus.value === 'all' ||
+        (filterStatus.value === 'active' && !task.done) ||
+        (filterStatus.value === 'completed' && task.done);
 
-    return filtered
+      const searchMatch = !query || task.title.toLowerCase().includes(query);
+
+      return statusMatch && searchMatch;
+    })
+
   })
 
   const initializeTasks = async () => {
